@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "modmenu_lite",
+  "version": "${version}",
+  "name": "Mod Menu Lite",
+  "description": "Menu with Chest ESP, Freecam and a DonutSMP auction price checker.",
+  "authors": ["you"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": { "client": ["com.modmenu.ModMenuLite"] },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
