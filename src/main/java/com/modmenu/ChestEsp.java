@@ -8,6 +8,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.Chunk;
@@ -38,14 +39,16 @@ public class ChestEsp {
         if (!mc.isInSingleplayer()) { enabled = false; targets = List.of(); return; }
         if (mc.world.getTime() % 10 != 0) return; // rescan twice per second
 
-        int vd = mc.options.getClientViewDistance().getValue();
+        int vd = 32;
         ChunkPos pc = mc.player.getChunkPos();
         List<Vec3d> list = new ArrayList<>();
         for (int dx = -vd; dx <= vd; dx++) {
             for (int dz = -vd; dz <= vd; dz++) {
                 Chunk c = mc.world.getChunk(pc.x + dx, pc.z + dz, ChunkStatus.FULL, false);
                 if (c == null) continue;
-                for (BlockEntity be : c.getBlockEntities().values()) {
+                for (BlockPos bp : c.getBlockEntityPositions()) {
+                    BlockEntity be = c.getBlockEntity(bp);
+                    if (be == null) continue;
                     boolean hit = (chests && be instanceof ChestBlockEntity)
                             || (enderChests && be instanceof EnderChestBlockEntity)
                             || (shulkers && be instanceof ShulkerBoxBlockEntity);
@@ -107,11 +110,18 @@ public class ChestEsp {
             int size = (int) Math.max(6, Math.min(120, (H / 2.0) / (tanHalf * zc)));
             int x1 = ix - size / 2, y1 = iy - size / 2;
             ctx.fill(x1, y1, x1 + size, y1 + size, 0x40FFC040);
-            ctx.drawBorder(x1, y1, size, size, ORANGE);
+            border(ctx, x1, y1, size, size, ORANGE);
             if (ix >= 0 && ix < W && iy >= 0 && iy < H) {
                 ctx.drawTextWithShadow(mc.textRenderer, (int) dist + "m", x1, y1 - 10, ORANGE);
             }
         }
+    }
+
+    private static void border(DrawContext ctx, int x, int y, int w, int h, int color) {
+        ctx.fill(x, y, x + w, y + 1, color);
+        ctx.fill(x, y + h - 1, x + w, y + h, color);
+        ctx.fill(x, y + 1, x + 1, y + h - 1, color);
+        ctx.fill(x + w - 1, y + 1, x + w, y + h - 1, color);
     }
 
     private static int clamp(int v, int lo, int hi) { return Math.max(lo, Math.min(hi, v)); }
